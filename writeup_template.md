@@ -19,11 +19,11 @@ The goals / steps of this project are the following:
 
 [image1]: ./output_images/undistort_output.png "Undistorted"
 [image2]: ./test_images/test5.jpg "Road Transformed"
-[image3]: ./examples/binary_combo_example.jpg "Binary Example"
-[image4]: ./examples/warped_straight_lines.jpg "Warp Example"
-[image5]: ./examples/color_fit_lines.jpg "Fit Visual"
-[image6]: ./examples/example_output.jpg "Output"
-[video1]: ./project_video.mp4 "Video"
+[image3]: ./output_images/binary_combo_example.png "Binary Example"
+[image4]: ./output_images/warped_example.png "Warp Example"
+[image5]: ./output_images/lane-lines_example.png "Fit Visual"
+[image6]: ./output_images/example_output.png "Output"
+[video1]: ./project_video_out.mp4 "Video"
 
 ### Camera Calibration
 
@@ -46,35 +46,37 @@ To demonstrate this step, I will describe how I apply the distortion correction 
 
 #### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 
-After I try lots of the combination of color and gradient thresholds to generate a binary image (thresholding steps at Section 3 in IPython notebook `advlaneline.ipynb`).  Here's an example of my output for this step.
+After I try lots of the combination of color and gradient thresholds to generate a binary image (thresholding steps at Section 3 in IPython notebook `advlaneline.ipynb`). In the end, I use the sobel, direction and magnitude of the gradient and color. Here's an example of my result for this step. As you can the lanes line was marked clearly which help to following steps.
 
 ![alt text][image3]
 
 #### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
-The code for my perspective transform includes a function called `warper()`, which appears in lines 1 through 8 in the file `example.py` (output_images/examples/example.py) (or, for example, in the 3rd code cell of the IPython notebook).  The `warper()` function takes as inputs an image (`img`), as well as source (`src`) and destination (`dst`) points.  I chose the hardcode the source and destination points in the following manner:
+The code for my perspective transform includes a function called `warper()`, which appears in the section 4 of the IPython notebook). The `warper()` function takes as inputs an image (`img`), as well as source (`src`) and destination (`dst`) points.  I chose the hardcode the source and destination points in the following manner:
 
 ```python
 src = np.float32(
-    [[(img_size[0] / 2) - 55, img_size[1] / 2 + 100],
-    [((img_size[0] / 6) - 10), img_size[1]],
-    [(img_size[0] * 5 / 6) + 60, img_size[1]],
-    [(img_size[0] / 2 + 55), img_size[1] / 2 + 100]])
+    [[580, 450],
+     [760, 450],
+     [160, 688],
+     [1140,688]])
+
+offset = 30
 dst = np.float32(
-    [[(img_size[0] / 4), 0],
-    [(img_size[0] / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), 0]])
+    [[offset, offset],
+     [img.shape[1]-offset, offset],
+     [offset, img.shape[0]-offset],
+     [img.shape[1]-offset, img.shape[0]-offset]])
 ```
 
 This resulted in the following source and destination points:
 
 | Source        | Destination   |
 |:-------------:|:-------------:|
-| 585, 460      | 320, 0        |
-| 203, 720      | 320, 720      |
-| 1127, 720     | 960, 720      |
-| 695, 460      | 960, 0        |
+| 585, 450      | 30,  30       |
+| 160, 688      | 30,  690      |
+| 1140,688      | 1250,30       |
+| 760, 450      | 1250,690      |
 
 I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
 
@@ -82,17 +84,18 @@ I verified that my perspective transform was working as expected by drawing the 
 
 #### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
-Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like this:
+First use histogram to find out the two peak point, those are the left and right lane-line candidate. Then using the sliding windows search to postions the polynomial.
+Then I did some other stuff and fit my lane lines kinda like this:
 
 ![alt text][image5]
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-I did this in lines # through # in my code in `my_other_file.py`
+I did this in the section "Measuring Curvature" in IPython notebook function LaneCurvature()
 
 #### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
-I implemented this step in lines # through # in my code in `yet_another_file.py` in the function `map_lane()`.  Here is an example of my result on a test image:
+I implemented this step in clase Line(), inside the find_lane() methods.  Here is an example of my result on a test image:
 
 ![alt text][image6]
 
@@ -102,12 +105,12 @@ I implemented this step in lines # through # in my code in `yet_another_file.py`
 
 #### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
 
-Here's a [link to my video result](./project_video.mp4)
+Here's a [link to my video result](./project_video_out.mp4)
 
 ---
-
 ### Discussion
 
-#### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
+#### Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+1. At first, the thresholded method result was not good, the right lane line was not clear. So the right lane line was result was not good. Then I tried several combination, finally can make the lane line much clear than beginning.
+2. Regarding to the src/dst of the perspective transform, i haven't find a way instead of hardcode. Sometimes in the `challenge_video.mp4` the lane-line look like too ahead and make the lane line mark not very well.  
